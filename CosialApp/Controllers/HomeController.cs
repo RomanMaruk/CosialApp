@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using CosialApp.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CosialApp.Controllers
