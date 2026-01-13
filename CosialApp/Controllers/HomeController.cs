@@ -24,6 +24,7 @@ namespace CosialApp.Controllers
             var allPosts = await _context.Posts
                 .Include(p => p.User)
                 .Include(n => n.Likes)
+                .Include(f => f.Favorites)
                 .Include(n => n.Comments).ThenInclude(u => u.User)
                 .OrderByDescending(n => n.DateCreated)
                 .ToListAsync();
@@ -101,6 +102,35 @@ namespace CosialApp.Controllers
         }
 
         [HttpPost]
+        public async Task<IActionResult> TogglePostFavorite(PostFavoriteVM postFavoriteVM)
+        {
+            int loggedInUser = 1;
+
+            // Check if user has already liked the post 
+            var favorite = await _context.Favorites
+                .Where(l => l.PostId == postFavoriteVM.PostId && l.UserId == loggedInUser)
+                .FirstOrDefaultAsync();
+
+            if (favorite != null)
+            {
+                _context.Favorites.Remove(favorite);
+                await _context.SaveChangesAsync();
+            }
+            else
+            {
+                var newFavorite = new Favorite()
+                {
+                    PostId = postFavoriteVM.PostId,
+                    UserId = loggedInUser,
+                };
+                _context.Favorites.Add(newFavorite);
+                await _context.SaveChangesAsync();
+            }
+
+            return RedirectToAction("Index");
+        }
+
+        [HttpPost]
         public async Task<IActionResult> AddPostComment(PostCommentVM postCommentVM)
         {
             int loggedInUser = 1;
@@ -133,5 +163,7 @@ namespace CosialApp.Controllers
             }
             return RedirectToAction("Index");
         }
+
+
     }
 }
