@@ -21,7 +21,9 @@ namespace CosialApp.Controllers
 
         public async Task<IActionResult> Index()
         {
+            int loggedInUserID = 1;
             var allPosts = await _context.Posts
+                .Where(n => !n.IsPrivate || n.UserId == loggedInUserID)
                 .Include(p => p.User)
                 .Include(n => n.Likes)
                 .Include(f => f.Favorites)
@@ -129,6 +131,44 @@ namespace CosialApp.Controllers
 
             return RedirectToAction("Index");
         }
+
+        [HttpPost]
+        public async Task<IActionResult> TogglePostVisibility(PostVisibilityVM postVisibilityVM)
+        {
+            int loggedInUser = 1;
+
+            // get post by id and logged user id
+            var post = await _context.Posts
+                .FirstOrDefaultAsync(l => l.Id == postVisibilityVM.PostId && l.UserId == loggedInUser);
+                
+
+            if (post != null)
+            {
+                post.IsPrivate = !post.IsPrivate;
+                _context.Update(post);
+                await _context.SaveChangesAsync();
+            }
+
+            return RedirectToAction("Index");
+        }
+
+        //[HttpPost]
+        //public async Task<IActionResult> RemovePost(PostVisibilityVM postVM)
+        //{
+        //    // get post by id and logged user id
+        //    var post = await _context.Posts
+        //        .FirstOrDefaultAsync(l => l.Id == postVM.PostId);
+
+
+        //    if (post != null)
+        //    {
+        //        _context.Remove(post);
+        //        await _context.SaveChangesAsync();
+        //    }
+
+        //    return RedirectToAction("Index");
+        //}
+
 
         [HttpPost]
         public async Task<IActionResult> AddPostComment(PostCommentVM postCommentVM)

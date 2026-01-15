@@ -12,6 +12,7 @@ namespace CircleApp.Data.Models
         public string? ImageUrl{ get; set; }
 
         public int NrOfReports { get; set; }
+        public bool IsPrivate { get; set; }
 
         public DateTime DateCreated {  get; set; }
 
