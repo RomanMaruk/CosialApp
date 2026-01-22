@@ -23,11 +23,12 @@ namespace CosialApp.Controllers
         {
             int loggedInUserID = 1;
             var allPosts = await _context.Posts
-                .Where(n => !n.IsPrivate || n.UserId == loggedInUserID)
+                .Where(n => (!n.IsPrivate || n.UserId == loggedInUserID) && n.Reports.Count < 5 && !n.IsDeleted)
                 .Include(p => p.User)
                 .Include(n => n.Likes)
                 .Include(f => f.Favorites)
                 .Include(n => n.Comments).ThenInclude(u => u.User)
+                .Include(n => n.Reports)
                 .OrderByDescending(n => n.DateCreated)
                 .ToListAsync();
             return View(allPosts);
@@ -152,22 +153,23 @@ namespace CosialApp.Controllers
             return RedirectToAction("Index");
         }
 
-        //[HttpPost]
-        //public async Task<IActionResult> RemovePost(PostVisibilityVM postVM)
-        //{
-        //    // get post by id and logged user id
-        //    var post = await _context.Posts
-        //        .FirstOrDefaultAsync(l => l.Id == postVM.PostId);
+        [HttpPost]
+        public async Task<IActionResult> PostRemove(PostRemoveVM postVM)
+        {
+            // get post by id and logged user id
+            var post = await _context.Posts
+                .FirstOrDefaultAsync(l => l.Id == postVM.PostId);
 
 
-        //    if (post != null)
-        //    {
-        //        _context.Remove(post);
-        //        await _context.SaveChangesAsync();
-        //    }
+            if (post != null)
+            {
+                post.IsDeleted = true;
+                _context.Update(post);
+                await _context.SaveChangesAsync();
+            }
 
-        //    return RedirectToAction("Index");
-        //}
+            return RedirectToAction("Index");
+        }
 
 
         [HttpPost]
@@ -204,6 +206,24 @@ namespace CosialApp.Controllers
             return RedirectToAction("Index");
         }
 
+        [HttpPost]
+        public async Task<IActionResult> AddPostReport(PostReportVM postReportVM)
+        {
+            int loggedInUser = 1;
+
+            // Create post object 
+            var newReport = new Report()
+            {
+                UserId = loggedInUser,
+                PostId = postReportVM.PostId,
+                DateCreated = DateTime.UtcNow,
+            };
+
+            await _context.Reports.AddAsync(newReport);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("Index");
+        }
 
     }
 }

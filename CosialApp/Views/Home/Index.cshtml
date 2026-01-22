@@ -100,3 +100,13 @@
 
 <partial name="Modals/_CreateStory" />
 <partial name="Modals/_CreateStatus" model="new PostVM()" />
+<partial name="Home/_PostDeleteConfirmation" />
+
+
+<script>
+    function openPostDeleteConfirmation(postId) {
+        UIkit.dropdown('.post-option-dropdown').hide();
+        document.getElementById('deleteConfirmationPostId').value = postId;
+        UIkit.modal('#postDeleteDialog').show();
+    }
+</script>

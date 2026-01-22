@@ -17,6 +17,7 @@ namespace CircleApp.Data.Models
         public DateTime DateCreated {  get; set; }
 
         public DateTime DateUpdated { get; set; }
+        public bool IsDeleted { get; set; }
 
         // Foreign key
         public int UserId { get; set; }
@@ -27,5 +28,6 @@ namespace CircleApp.Data.Models
         public ICollection<Comment> Comments { get; set; } = new List<Comment>();
 
         public ICollection<Favorite> Favorites { get; set; } = new List<Favorite>();
+        public ICollection<Report> Reports { get; set; } = new List<Report>();
     }
 }
